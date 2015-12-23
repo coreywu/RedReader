@@ -19,16 +19,26 @@ package org.quantumbadger.redreader.reddit.prepared.markdown;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.Paint.Style;
+import android.graphics.Typeface;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.UnderlineSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
+
 import com.laurencedawson.activetextview.ActiveTextView;
+
 import org.quantumbadger.redreader.common.General;
 import org.quantumbadger.redreader.views.LinkDetailsView;
+
+import java.util.List;
 
 public final class MarkdownParagraphGroup {
 
@@ -38,6 +48,7 @@ public final class MarkdownParagraphGroup {
 		this.paragraphs = paragraphs;
 	}
 
+	@SuppressWarnings("deprecation")
 	public ViewGroup buildView(final Activity activity, final Integer textColor, final Float textSize,
 							   final boolean showLinkButtons) {
 
@@ -163,6 +174,78 @@ public final class MarkdownParagraphGroup {
 
 					break;
 				}
+
+				case TABLE:
+					MarkdownTableParagraph table = (MarkdownTableParagraph) paragraph;
+					List<Integer> rowEndIndices = table.getRowEndIndices();
+
+					TableLayout tableLayout = new TableLayout(activity);
+					TableLayout.LayoutParams tableRowParams = new TableLayout.LayoutParams(
+							TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT);
+					tableRowParams.setMargins(1, 1, 1, 1);
+
+					TableRow tableHeader = new TableRow(activity);
+
+					String header = table.raw.substring(0, rowEndIndices.get(1)).toString();
+					if (header.charAt(0) == '|') {
+						header = header.substring(1);
+					}
+					String[] headerStrings = header.split("\\|");
+
+					int columns = headerStrings.length;
+
+					for (String headerString : headerStrings) {
+						TextView headerTextView = new TextView(activity);
+						headerTextView.setText(headerString.trim());
+						headerTextView.setTypeface(null, Typeface.BOLD);
+
+						// Add border
+						ShapeDrawable border = new ShapeDrawable(new RectShape());
+						border.getPaint().setStyle(Style.STROKE);
+						border.getPaint().setColor(Color.WHITE);
+						headerTextView.setBackgroundDrawable(border);
+
+						tableHeader.addView(headerTextView);
+					}
+					tableHeader.setLayoutParams(tableRowParams);
+					tableLayout.addView(tableHeader);
+
+					for (int i = 2; i < rowEndIndices.size() - 2; i++) {
+						TableRow tableRow = new TableRow(activity);
+						String row;
+
+						if (i < rowEndIndices.size() - 3) {
+							row = table.raw.substring(rowEndIndices.get(i), rowEndIndices.get(i + 1) - rowEndIndices.get(i)).toString();
+						} else {
+							row = table.raw.substring(rowEndIndices.get(rowEndIndices.size() - 3), table.raw.length - rowEndIndices.get(rowEndIndices.size() - 3)).toString();
+						}
+
+						if (row.charAt(0) == '|') {
+							row = row.substring(1);
+						}
+
+						String[] tableRowStrings = row.split("\\|");
+
+						for (int j = 0; j < columns; j++) {
+							TextView tableRowTextView = new TextView(activity);
+							if (j < tableRowStrings.length) {
+								tableRowTextView.setText(tableRowStrings[j].trim());
+							}
+
+							// Add border
+							ShapeDrawable border = new ShapeDrawable(new RectShape());
+							border.getPaint().setStyle(Style.STROKE);
+							border.getPaint().setColor(Color.WHITE);
+							tableRowTextView.setBackgroundDrawable(border);
+
+							tableRow.addView(tableRowTextView);
+						}
+						tableRow.setLayoutParams(tableRowParams);
+						tableLayout.addView(tableRow);
+					}
+
+					layout.addView(tableLayout);
+					break;
 
 				case TEXT:
 

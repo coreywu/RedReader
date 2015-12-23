@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // TODO number links
-public final class MarkdownParagraph {
+public class MarkdownParagraph {
 
 	final CharArrSubstring raw;
 	final MarkdownParagraph parent;

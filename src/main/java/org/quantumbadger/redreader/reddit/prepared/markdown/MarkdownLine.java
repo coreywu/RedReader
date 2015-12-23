@@ -17,7 +17,7 @@
 
 package org.quantumbadger.redreader.reddit.prepared.markdown;
 
-public final class MarkdownLine {
+public class MarkdownLine {
 
 	public final CharArrSubstring src;
 	public final MarkdownParser.MarkdownParagraphType type;
@@ -60,7 +60,22 @@ public final class MarkdownLine {
 				return new MarkdownLine(src, MarkdownParser.MarkdownParagraphType.QUOTE, spacesAtStart, spacesAtEnd, prefixLen, level, 0);
 			}
 
+			// Potential table delimiter (eg. ":---|:---|--")
+			case '|':
 			case '-':
+			case ':':
+				// Check if there's a decent chance that the line is a table justification line
+				// Note: Reddit's Markdown allows for additional characters after the valid markdown table delimiter
+				// which would not be supported here
+				if (src.toString().matches("[\\-\\|:]+")) {
+					return new MarkdownLine(src, MarkdownParser.MarkdownParagraphType.TABLE_DELIMITER, spacesAtStart, spacesAtEnd,
+							spacesAtStart, 0, 0);
+				} else {
+					// Turns out it's just regular text
+					return new MarkdownLine(src, MarkdownParser.MarkdownParagraphType.TEXT, spacesAtStart, spacesAtEnd,
+							spacesAtStart, 0, 0);
+				}
+
 			case '*':
 			{
 
@@ -138,7 +153,7 @@ public final class MarkdownLine {
 		}
 	}
 
-	private boolean isPlainText() {
+	public boolean isPlainText() {
 
 		for(int i = prefixLength; i < src.length; i++) {
 			switch(src.arr[i + src.start]) {
@@ -191,5 +206,17 @@ public final class MarkdownLine {
 		}
 
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "MarkdownLine: [ src: " + this.src
+				+ ", type: " + this.type
+				+ ", spacesAtStart: " + this.spacesAtStart
+				+ ", spacesAtEnd: " + this.spacesAtEnd
+				+ ", prefixLength: " + this.prefixLength
+				+ ", level: " + this.level
+				+ ", number: " + this.number
+				+ " ]";
 	}
 }

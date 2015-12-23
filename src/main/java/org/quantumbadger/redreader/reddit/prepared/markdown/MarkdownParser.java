@@ -21,8 +21,8 @@ import java.util.ArrayList;
 
 public final class MarkdownParser {
 
-	public static enum MarkdownParagraphType {
-		TEXT, CODE, BULLET, NUMBERED, QUOTE, HEADER, HLINE, EMPTY
+	public enum MarkdownParagraphType {
+		TEXT, CODE, BULLET, NUMBERED, QUOTE, HEADER, HLINE, EMPTY, TABLE_DELIMITER, TABLE
 	}
 
 	public static MarkdownParagraphGroup parse(final char[] raw) {
@@ -59,6 +59,32 @@ public final class MarkdownParser {
 						currentLine = null;
 						break;
 
+					case TABLE_DELIMITER:
+						if (i > 0 && isValidTableDelimiter(lines[i].src.toString())) {
+							// Build the entire table from delimiter, header and remaining lines
+
+							currentLine = new MarkdownTableLine(currentLine);
+							currentLine = ((MarkdownTableLine) currentLine).createTable(lines[i]);
+
+							if (lines[i + 1].src != null) {
+								String line = lines[i + 1].src.toString();
+								while (line.contains("|") && i < lines.length - 2) {
+									currentLine = ((MarkdownTableLine) currentLine).createTable(lines[i + 1]);
+									i++;
+									if (lines[i + 1].src == null) break;
+									line = lines[i + 1].src.toString();
+								}
+								i++;
+							}
+
+							currentLine = ((MarkdownTableLine) currentLine).normalizeTable();
+							mergedLines.add(currentLine);
+							currentLine = null;
+
+							break;
+						}
+						// Else, treat the line as normal text
+
 					case TEXT:
 
 						if(i < 1) {
@@ -89,6 +115,7 @@ public final class MarkdownParser {
 						}
 
 						break;
+
 				}
 			} else if(lines[i].type != MarkdownParagraphType.EMPTY) {
 				currentLine = lines[i];
@@ -108,5 +135,29 @@ public final class MarkdownParser {
 		}
 
 		return new MarkdownParagraphGroup(outputParagraphs.toArray(new MarkdownParagraph[outputParagraphs.size()]));
+	}
+
+	public static boolean isValidTableDelimiter(String line) {
+		if (line.length() == 1) {
+			return false;
+		} else if (line.contains("||")) {
+			return false;
+		} else if (line.contains("::-") || line.contains("-::") || line.contains(":::")) {
+			return false;
+		}
+
+		String[] splitLines = line.split("\\|");
+
+		for (String splitLine : splitLines) {
+			if (countCharInString(splitLine, ':') > 2) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public static int countCharInString(String string, char c) {
+		return string.length() - string.replaceAll(String.valueOf(c), "").length();
 	}
 }
