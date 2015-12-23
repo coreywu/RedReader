@@ -23,7 +23,13 @@ import android.net.Uri;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.style.*;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StrikethroughSpan;
+import android.text.style.StyleSpan;
+import android.text.style.SuperscriptSpan;
+import android.text.style.TypefaceSpan;
+import android.text.style.URLSpan;
+
 import org.quantumbadger.redreader.common.LinkHandler;
 
 import java.util.ArrayList;
@@ -271,5 +277,18 @@ public class MarkdownParagraph {
 			}
 			return true;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "MarkdownParagraph: [ raw: " + this.raw
+				+ ", parent: " + this.parent
+				+ ", type: " + this.type
+				+ ", tokens: " + this.tokens
+				+ ", level: " + this.level
+				+ ", number: " + this.number
+//				+ ", spanned: " + this.spanned
+				+ ", links: " + this.links
+				+ " ]";
 	}
 }

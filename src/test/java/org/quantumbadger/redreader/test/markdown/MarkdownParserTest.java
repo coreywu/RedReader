@@ -46,6 +46,7 @@ public class MarkdownParserTest {
 		System.out.println(MarkdownParser.parse(input));
 	}
 
+	@Ignore
 	@Test
 	public void testComplexTable() {
 		char[] input = ("| Team | Time | Player | Penalty (Time) | Streamable\n" +
@@ -64,7 +65,6 @@ public class MarkdownParserTest {
 		System.out.println(MarkdownParser.parse(input));
 	}
 
-	@Ignore
 	@Test
 	public void testMultipleTables() {
 		char[] input = ("Stats Central|\n" +
@@ -94,7 +94,4 @@ public class MarkdownParserTest {
 
 		System.out.println(MarkdownParser.parse(input));
 	}
-
-
-
 }

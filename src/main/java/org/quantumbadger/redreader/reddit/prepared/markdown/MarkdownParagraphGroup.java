@@ -26,8 +26,10 @@ import android.graphics.drawable.shapes.RectShape;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.UnderlineSpan;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -35,9 +37,11 @@ import android.widget.TextView;
 
 import com.laurencedawson.activetextview.ActiveTextView;
 
+import org.quantumbadger.redreader.R;
 import org.quantumbadger.redreader.common.General;
 import org.quantumbadger.redreader.views.LinkDetailsView;
 
+import java.util.Arrays;
 import java.util.List;
 
 public final class MarkdownParagraphGroup {
@@ -55,6 +59,7 @@ public final class MarkdownParagraphGroup {
 		final float dpScale = activity.getResources().getDisplayMetrics().density;
 
 		final int paragraphSpacing = (int) (dpScale * 6);
+		final int cellPadding = (int) (dpScale * 4);
 		final int codeLineSpacing = (int) (dpScale * 3);
 		final int quoteBarWidth = (int) (dpScale * 3);
 		final int maxQuoteLevel = 5;
@@ -176,13 +181,15 @@ public final class MarkdownParagraphGroup {
 				}
 
 				case TABLE:
+					// Get color for table cell borders
+					TypedValue typedValue = new TypedValue();
+					activity.getTheme().resolveAttribute(R.attr.rrCommentBodyCol, typedValue, true);
+					int borderColor = typedValue.data;
+
 					MarkdownTableParagraph table = (MarkdownTableParagraph) paragraph;
 					List<Integer> rowEndIndices = table.getRowEndIndices();
 
 					TableLayout tableLayout = new TableLayout(activity);
-					TableLayout.LayoutParams tableRowParams = new TableLayout.LayoutParams(
-							TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT);
-					tableRowParams.setMargins(1, 1, 1, 1);
 
 					TableRow tableHeader = new TableRow(activity);
 
@@ -202,12 +209,12 @@ public final class MarkdownParagraphGroup {
 						// Add border
 						ShapeDrawable border = new ShapeDrawable(new RectShape());
 						border.getPaint().setStyle(Style.STROKE);
-						border.getPaint().setColor(Color.WHITE);
+						border.getPaint().setColor(borderColor);
 						headerTextView.setBackgroundDrawable(border);
+						headerTextView.setPadding(cellPadding, 0, cellPadding, 0);
 
 						tableHeader.addView(headerTextView);
 					}
-					tableHeader.setLayoutParams(tableRowParams);
 					tableLayout.addView(tableHeader);
 
 					for (int i = 2; i < rowEndIndices.size() - 2; i++) {
@@ -235,16 +242,24 @@ public final class MarkdownParagraphGroup {
 							// Add border
 							ShapeDrawable border = new ShapeDrawable(new RectShape());
 							border.getPaint().setStyle(Style.STROKE);
-							border.getPaint().setColor(Color.WHITE);
+							border.getPaint().setColor(borderColor);
 							tableRowTextView.setBackgroundDrawable(border);
+							tableRowTextView.setPadding(cellPadding, 0, cellPadding, 0);
 
 							tableRow.addView(tableRowTextView);
 						}
-						tableRow.setLayoutParams(tableRowParams);
 						tableLayout.addView(tableRow);
 					}
 
-					layout.addView(tableLayout);
+					HorizontalScrollView horizontalScrollView = new HorizontalScrollView(activity);
+					HorizontalScrollView.LayoutParams horizontalScrollLayoutParams = new HorizontalScrollView.LayoutParams(
+							HorizontalScrollView.LayoutParams.WRAP_CONTENT, HorizontalScrollView.LayoutParams.WRAP_CONTENT);
+					horizontalScrollLayoutParams.setMargins(0, paragraphSpacing, 0, 0);
+					horizontalScrollView.setLayoutParams(horizontalScrollLayoutParams);
+
+					horizontalScrollView.addView(tableLayout);
+
+					layout.addView(horizontalScrollView);
 					break;
 
 				case TEXT:
@@ -280,5 +295,11 @@ public final class MarkdownParagraphGroup {
 		}
 
 		return layout;
+	}
+
+	@Override
+
+	public String toString() {
+		return "MarkdownParagraphGroup: [ paragraphs: " + Arrays.toString(paragraphs) + " ]";
 	}
 }
