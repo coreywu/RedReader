@@ -27,6 +27,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.UnderlineSpan;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
@@ -41,6 +42,7 @@ import org.quantumbadger.redreader.R;
 import org.quantumbadger.redreader.common.General;
 import org.quantumbadger.redreader.views.LinkDetailsView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -191,20 +193,31 @@ public final class MarkdownParagraphGroup {
 
 					TableLayout tableLayout = new TableLayout(activity);
 
+					// Get cell justification from delimiter
+					String gravityString = table.raw.substring(
+							rowEndIndices.get(1), rowEndIndices.get(2) - rowEndIndices.get(1)).toString();
+					List<Integer> gravityList = getGravity(gravityString);
+
 					TableRow tableHeader = new TableRow(activity);
 
-					String header = table.raw.substring(0, rowEndIndices.get(1)).toString();
+					String header = table.raw.substring(0, rowEndIndices.get(1)).toString().trim();
+
 					if (header.charAt(0) == '|') {
 						header = header.substring(1);
 					}
+					if (header.charAt(header.length() - 1) == '|') {
+						header = header.substring(0, header.length());
+					}
+
 					String[] headerStrings = header.split("\\|");
 
 					int columns = headerStrings.length;
 
-					for (String headerString : headerStrings) {
+					for (int i = 0; i < columns; i++) {
 						TextView headerTextView = new TextView(activity);
-						headerTextView.setText(headerString.trim());
+						headerTextView.setText(headerStrings[i].trim());
 						headerTextView.setTypeface(null, Typeface.BOLD);
+						headerTextView.setGravity(gravityList.get(i));
 
 						// Add border
 						ShapeDrawable border = new ShapeDrawable(new RectShape());
@@ -222,13 +235,18 @@ public final class MarkdownParagraphGroup {
 						String row;
 
 						if (i < rowEndIndices.size() - 3) {
-							row = table.raw.substring(rowEndIndices.get(i), rowEndIndices.get(i + 1) - rowEndIndices.get(i)).toString();
+							row = table.raw.substring(
+									rowEndIndices.get(i), rowEndIndices.get(i + 1) - rowEndIndices.get(i)).toString();
 						} else {
-							row = table.raw.substring(rowEndIndices.get(rowEndIndices.size() - 3), table.raw.length - rowEndIndices.get(rowEndIndices.size() - 3)).toString();
+							row = table.raw.substring(rowEndIndices.get(rowEndIndices.size() - 3),
+									table.raw.length - rowEndIndices.get(rowEndIndices.size() - 3)).toString();
 						}
 
-						if (row.charAt(0) == '|') {
-							row = row.substring(1);
+						if (header.charAt(0) == '|') {
+							header = header.substring(1);
+						}
+						if (header.charAt(header.length() - 1) == '|') {
+							header = header.substring(0, header.length() - 2);
 						}
 
 						String[] tableRowStrings = row.split("\\|");
@@ -238,6 +256,7 @@ public final class MarkdownParagraphGroup {
 							if (j < tableRowStrings.length) {
 								tableRowTextView.setText(tableRowStrings[j].trim());
 							}
+							tableRowTextView.setGravity(gravityList.get(j));
 
 							// Add border
 							ShapeDrawable border = new ShapeDrawable(new RectShape());
@@ -297,8 +316,27 @@ public final class MarkdownParagraphGroup {
 		return layout;
 	}
 
-	@Override
+	private List<Integer> getGravity(String justificationString) {
+		if (justificationString.charAt(0) == '|') {
+			justificationString = justificationString.substring(1);
+		}
+		if (justificationString.charAt(justificationString.length() - 1) == '|') {
+			justificationString = justificationString.substring(0, justificationString.length() - 2);
+		}
+		List<Integer> gravityList = new ArrayList<>();
+		for (String justification : justificationString.split("\\|")) {
+			if (MarkdownParser.countCharInString(justification, ':') == 2) {
+				gravityList.add(Gravity.CENTER);
+			} else if (justification.charAt(0) == ':' || MarkdownParser.countCharInString(justification, ':') == 0) {
+				gravityList.add(Gravity.LEFT);
+			} else {
+				gravityList.add(Gravity.RIGHT);
+			}
+		}
+		return gravityList;
+	}
 
+	@Override
 	public String toString() {
 		return "MarkdownParagraphGroup: [ paragraphs: " + Arrays.toString(paragraphs) + " ]";
 	}
