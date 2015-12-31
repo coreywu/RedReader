@@ -202,11 +202,12 @@ public final class MarkdownParagraphGroup {
 
 					String header = table.raw.substring(0, rowEndIndices.get(1)).toString().trim();
 
+					header = header.trim();
 					if (header.charAt(0) == '|') {
 						header = header.substring(1);
 					}
 					if (header.charAt(header.length() - 1) == '|') {
-						header = header.substring(0, header.length());
+						header = header.substring(0, header.length() - 1);
 					}
 
 					String[] headerStrings = header.split("\\|");
@@ -242,11 +243,12 @@ public final class MarkdownParagraphGroup {
 									table.raw.length - rowEndIndices.get(rowEndIndices.size() - 3)).toString();
 						}
 
-						if (header.charAt(0) == '|') {
-							header = header.substring(1);
+						row = row.trim();
+						if (row.charAt(0) == '|') {
+							row = row.substring(1);
 						}
-						if (header.charAt(header.length() - 1) == '|') {
-							header = header.substring(0, header.length() - 2);
+						if (row.charAt(row.length() - 1) == '|') {
+							row = row.substring(0, row.length() - 1);
 						}
 
 						String[] tableRowStrings = row.split("\\|");
@@ -317,14 +319,16 @@ public final class MarkdownParagraphGroup {
 	}
 
 	private List<Integer> getGravity(String justificationString) {
+		justificationString = justificationString.trim();
 		if (justificationString.charAt(0) == '|') {
 			justificationString = justificationString.substring(1);
 		}
 		if (justificationString.charAt(justificationString.length() - 1) == '|') {
-			justificationString = justificationString.substring(0, justificationString.length() - 2);
+			justificationString = justificationString.substring(0, justificationString.length() - 1);
 		}
 		List<Integer> gravityList = new ArrayList<>();
 		for (String justification : justificationString.split("\\|")) {
+			justification = justification.trim();
 			if (MarkdownParser.countCharInString(justification, ':') == 2) {
 				gravityList.add(Gravity.CENTER);
 			} else if (justification.charAt(0) == ':' || MarkdownParser.countCharInString(justification, ':') == 0) {
