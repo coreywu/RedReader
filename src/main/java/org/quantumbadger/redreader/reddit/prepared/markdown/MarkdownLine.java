@@ -67,7 +67,7 @@ public class MarkdownLine {
 				// Check if there's a decent chance that the line is a table justification line
 				// Note: Reddit's Markdown allows for additional characters after the valid markdown table delimiter
 				// which would not be supported here
-				if (src.toString().matches("[\\-\\|:]+")) {
+				if (src.toString().matches("[\\-\\|: ]+")) {
 					return new MarkdownLine(src, MarkdownParser.MarkdownParagraphType.TABLE_DELIMITER, spacesAtStart, spacesAtEnd,
 							spacesAtStart, 0, 0);
 				} else {

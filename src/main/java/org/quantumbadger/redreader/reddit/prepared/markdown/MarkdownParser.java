@@ -144,6 +144,8 @@ public final class MarkdownParser {
 			return false;
 		} else if (line.contains("::-") || line.contains("-::") || line.contains(":::")) {
 			return false;
+		} else if (line.contains("- -")) {
+			return false;
 		}
 
 		String[] splitLines = line.split("\\|");

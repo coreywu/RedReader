@@ -24,6 +24,12 @@ public class MarkdownParserTest {
 		assertTrue(MarkdownParser.isValidTableDelimiter("|--|:--:|--"));
 		assertTrue(MarkdownParser.isValidTableDelimiter("-|"));
 		assertTrue(MarkdownParser.isValidTableDelimiter("|:-:|:-:|:-:|:-:|:-:|"));
+		assertTrue(MarkdownParser.isValidTableDelimiter(":---: |"));
+		assertTrue(MarkdownParser.isValidTableDelimiter("---| ---"));
+		assertTrue(MarkdownParser.isValidTableDelimiter("---|   ---"));
+		assertTrue(MarkdownParser.isValidTableDelimiter("---|---  "));
+		assertTrue(MarkdownParser.isValidTableDelimiter("---|---  |"));
+		assertTrue(MarkdownParser.isValidTableDelimiter("---|---  |  --"));
 		assertFalse(MarkdownParser.isValidTableDelimiter("--||--"));
 		assertFalse(MarkdownParser.isValidTableDelimiter("|"));
 		assertFalse(MarkdownParser.isValidTableDelimiter("||--"));
@@ -31,6 +37,7 @@ public class MarkdownParserTest {
 		assertFalse(MarkdownParser.isValidTableDelimiter(":---:|:-:-:|:--:"));
 		assertFalse(MarkdownParser.isValidTableDelimiter(":---:|:---:|::-:"));
 		assertFalse(MarkdownParser.isValidTableDelimiter(":---:|:---:|:-::"));
+		assertFalse(MarkdownParser.isValidTableDelimiter("-- -|--"));
 	}
 
 	@Ignore
@@ -65,6 +72,19 @@ public class MarkdownParserTest {
 		System.out.println(MarkdownParser.parse(input));
 	}
 
+	@Ignore
+	@Test
+	public void testComplexTable2() {
+		char[] input = ("| 2016 World Junior Classic\n" +
+				":---: |\n" +
+				"**Location**: Helsinki, Finland |\n" +
+				"**Tournament Length**: December 26th - January 5th |\n" +
+				"**Participating Nations**: [](/r/canada) [](/r/denmark) [](/r/sweden) [](/r/switzerland) [](/r/usa) [](/r/belarus) [](/r/czech) [](/r/finland) [](/r/russia) [](/r/slovakia) |\n" +
+				"**Arenas**: [Hartwall Arena - cap. 13,506](https://en.wikipedia.org/wiki/Hartwall_Arena) &amp; [Helsinki Ice Hall - cap 8,200](https://en.wikipedia.org/wiki/Helsinki_Ice_Hall) |").toCharArray();
+		System.out.println(MarkdownParser.parse(input));
+	}
+
+	@Ignore
 	@Test
 	public void testMultipleTables() {
 		char[] input = ("Stats Central|\n" +
