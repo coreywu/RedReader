@@ -66,7 +66,7 @@ public final class MarkdownParser {
 							currentLine = new MarkdownTableLine(currentLine);
 							currentLine = ((MarkdownTableLine) currentLine).createTable(lines[i]);
 
-							if (lines[i + 1].src != null) {
+							if (i + 1 < lines.length && lines[i + 1].src != null) {
 								String line = lines[i + 1].src.toString();
 								while (line.contains("|") && i < lines.length - 2) {
 									currentLine = ((MarkdownTableLine) currentLine).createTable(lines[i + 1]);
